@@ -66,11 +66,55 @@ export async function signInAccount(user: { email: string; password: string }) {
 }
 
 
+// export async function getCurrentUser() {
+//   try {
+//     const currentAccount = await account.get();
+
+//     if (!currentAccount) throw Error;
+
+//     const currentUser = await databases.listDocuments(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.userCollectionId,
+//       [Query.equal("accountId", currentAccount.$id)]
+//     );
+
+//     if (!currentUser) throw Error;
+
+//     return currentUser.documents[0];
+//   } catch (error) {
+//     console.log(error);
+//     return null;
+//   }
+// }
+
+
+// export async function getCurrentUser() {
+//   try {
+//     const currentAccount = await getAccount();
+
+//     if (!currentAccount) throw Error;
+
+//     const currentUser = await databases.listDocuments(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.userCollectionId,
+//       [Query.equal("accountId", currentAccount.$id)]
+//     );
+
+//     if (!currentUser) throw Error;
+
+//     return currentUser.documents[0];
+//   } catch (error) {
+//     console.log(error);
+//     return null;
+//   }
+// }
+
+
 export async function getCurrentUser() {
   try {
     const currentAccount = await account.get();
 
-    if (!currentAccount) throw Error;
+    if (!currentAccount) return null;
 
     const currentUser = await databases.listDocuments(
       appwriteConfig.databaseId,
@@ -78,11 +122,22 @@ export async function getCurrentUser() {
       [Query.equal("accountId", currentAccount.$id)]
     );
 
-    if (!currentUser) throw Error;
+    if (!currentUser || currentUser.documents.length === 0) return null;
 
     return currentUser.documents[0];
   } catch (error) {
-    console.log(error);
+    console.log("No current user:", error);
     return null;
+  }
+}
+
+
+export async function signOutAccount() {
+  try {
+    const session = await account.deleteSession("current");
+
+    return session;
+  } catch (error) {
+    console.log(error);
   }
 }

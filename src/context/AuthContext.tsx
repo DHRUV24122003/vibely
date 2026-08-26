@@ -1,10 +1,9 @@
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
  import { getCurrentUser } from "@/lib/appwrite/api";
 import type { IUser } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
 
-// import { IUser } from "@/types";
-// import { getCurrentUser } from "@/lib/appwrite/api";
+
 
 export const INITIAL_USER = {
   id: "",
@@ -36,7 +35,7 @@ type IContextType = {
   const AuthContext = createContext<IContextType>(INITIAL_STATE);
 
  export function AuthProvider({ children }: { children: React.ReactNode }) {
-//   const navigate = useNavigate();
+  const navigate = useNavigate();
    const [user, setUser] = useState<IUser>(INITIAL_USER);
    const [isAuthenticated, setIsAuthenticated] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
@@ -68,29 +67,29 @@ type IContextType = {
     }
   };
 
-//   useEffect(() => {
-//     const cookieFallback = localStorage.getItem("cookieFallback");
-//     if (
-//       cookieFallback === "[]" ||
-//       cookieFallback === null ||
-//       cookieFallback === undefined
-//     ) {
-//       navigate("/sign-in");
-//     }
+  useEffect(() => {
+    const cookieFallback = localStorage.getItem("cookieFallback");
+    if (
+      cookieFallback === "[]" || 
+      cookieFallback === null ||
+      cookieFallback === undefined
+    ) {
+      navigate("/sign-in");
+    }
 
-//     checkAuthUser();
-//   }, []);
+    checkAuthUser();
+  }, []);
 
-//   const value = {
-//     user,
-//     setUser,
-//     isLoading,
-//     isAuthenticated,
-//     setIsAuthenticated,
-//     checkAuthUser,
-//   };
+  const value = {
+    user,
+    setUser,
+    isLoading,
+    isAuthenticated,
+    setIsAuthenticated,
+    checkAuthUser,
+  };
 
-//   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-// }
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
-// export const useUserContext = () => useContext(AuthContext);
+export const useUserContext = () => useContext(AuthContext);

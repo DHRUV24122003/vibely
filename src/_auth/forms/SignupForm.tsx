@@ -3,6 +3,7 @@
 import * as z from "zod"
 import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 
@@ -14,12 +15,15 @@ import { SignupValidation } from "@/lib/validation"
 //import { createUserAccount } from "@/lib/appwrite/api"
 import { useToast } from "@/components/ui/use-toast"
 import { useCreateUserAccount, useSignInAccount } from "@/lib/react-query/queriesAndMutations.ts";
+import { useUserContext } from "@/context/AuthContext"
 
 const SignupForm = () => { 
   //const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
   const {toast} = useToast()
-  const { mutateAsync: createUserAccount, isLoading: isCreatingAccount } = useCreateUserAccount();
-    const { mutateAsync: signInAccount, isLoading: isSigningInUser } = useSignInAccount();
+  const {checkAuthUser, isLoading: isUserLoading} = useUserContext();
+  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } = useCreateUserAccount();
+    const { mutateAsync: signInAccount, isPending: isSigningInUser } = useSignInAccount();
 
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -34,7 +38,7 @@ const SignupForm = () => {
 
 
 async function onSubmit(values: z.infer<typeof SignupValidation>) {
-
+try{
 const newUser = await createUserAccount(values);
 if(!newUser){
   return toast({title: 'Sign-up failed, please try again'})
@@ -46,45 +50,38 @@ const session = await signInAccount({
 
 
 })
-if(!session){
-  return toast ({title:'sign in failed. Please try again'})
-}
-}
-    
+if (!session) {
+        toast({ title: "Something went wrong. Please login your new account", });
+        
+        navigate("/sign-in");
+        
+        return;
+      }
+      const isLoggedIn = await checkAuthUser();
 
-  //   setIsLoading(true)
+      if (isLoggedIn) {
+        form.reset();
 
-  // try {
-  //   const newUser = await createUserAccount(values)
-  //   console.log(newUser)
+        navigate("/");
+      } else {
+        toast({ title: "Login failed. Please try again.", });
+        
+        return;
+      }
+    } catch (error) {
+      console.log({ error });
+    }
+  };
 
-  //   if (!newUser) {
-  //     toast({
-  //       title: "Sign up failed. Please try again.",
-  //     })
-  //     return
-  //   }
 
-  //   toast({
-  //     title: "Account created successfully!",
-  //   })
+      
 
-  // } catch (error) {
-  //   console.log(error)
-  //   toast({
-  //     title: "Something went wrong.",
-  //     variant: "destructive",
-  //   })
-  // } finally {
-  //   setIsLoading(false)
-  // }
+
+  
 
 
 
-
-
-
-  }
+  
 
   return (
     <Form {...form}>
@@ -184,3 +181,37 @@ if(!session){
 }
 
 export default SignupForm
+
+
+
+
+
+
+//   setIsLoading(true)
+
+  // try {
+  //   const newUser = await createUserAccount(values)
+  //   console.log(newUser)
+
+  //   if (!newUser) {
+  //     toast({
+  //       title: "Sign up failed. Please try again.",
+  //     })
+  //     return
+  //   }
+
+  //   toast({
+  //     title: "Account created successfully!",
+  //   })
+
+  // } catch (error) {
+  //   console.log(error)
+  //   toast({
+  //     title: "Something went wrong.",
+  //     variant: "destructive",
+  //   })
+  // } finally {
+  //   setIsLoading(false)
+  // }
+
+
