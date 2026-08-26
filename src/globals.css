@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply min-h-screen font-inter bg-white text-black;
+    @apply min-h-screen font-inter bg-black text-white;
   }
   .theme {
     --font-heading: var(--font-sans);
