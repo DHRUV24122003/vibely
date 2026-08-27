@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { Models } from "appwrite";
+//import { Models } from "appwrite";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,21 +11,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  Button,
-  Input,
-  Textarea,
-} from "@/components/ui";
+} from "@/components/ui/form"
+ import { Textarea } from "../ui/Textarea"; 
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { PostValidation } from "@/lib/validation";
 import { useToast } from "@/components/ui/use-toast";
 import { useUserContext } from "@/context/AuthContext";
-import { FileUploader, Loader } from "@/components/shared";
-import { useCreatePost, useUpdatePost } from "@/lib/react-query/queries";
+import FileUploader from "@/components/shared/FileUploader"
+import Loader from "@/components/shared/Loader"
+import { useCreatePost, useUpdatePost } from "@/lib/react-query/queriesAndMutations";
+import type { IPost } from "@/types"
+// type PostFormProps = {
+//   post?: Models.Document;
+//   action: "Create" | "Update";
+// };
 
 type PostFormProps = {
-  post?: Models.Document;
-  action: "Create" | "Update";
-};
-
+  post?: IPost
+  action: "Create" | "Update"
+}
 const PostForm = ({ post, action }: PostFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -41,9 +46,9 @@ const PostForm = ({ post, action }: PostFormProps) => {
   });
 
   // Query
-  const { mutateAsync: createPost, isLoading: isLoadingCreate } =
+  const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreatePost();
-  const { mutateAsync: updatePost, isLoading: isLoadingUpdate } =
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
     useUpdatePost();
 
   // Handler
@@ -108,9 +113,13 @@ const PostForm = ({ post, action }: PostFormProps) => {
             <FormItem>
               <FormLabel className="shad-form_label">Add Photos</FormLabel>
               <FormControl>
-                <FileUploader
+                {/* <FileUploader
                   fieldChange={field.onChange}
                   mediaUrl={post?.imageUrl}
+                /> */}
+                <FileUploader
+                fieldChange={field.onChange}
+                mediaUrl={post?.imageUrl || ""}
                 />
               </FormControl>
               <FormMessage className="shad-form_message" />
@@ -166,7 +175,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
             disabled={isLoadingCreate || isLoadingUpdate}>
             {(isLoadingCreate || isLoadingUpdate) && <Loader />}
             {action} Post
-          </Button>
+          </Button> 
         </div>
       </form>
     </Form>

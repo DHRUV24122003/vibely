@@ -4,6 +4,15 @@ export type INavLink = {
   label: string;
 };
 
+export type IPost = {
+  $id: string
+  caption: string
+  location: string
+  tags: string[]
+  imageId: string
+  imageUrl: string
+}
+
 export type IUpdateUser = {
   userId: string;
   name: string;
@@ -22,14 +31,14 @@ export type INewPost = {
 };
 
 export type IUpdatePost = {
-  postId: string;
-  caption: string;
-  imageId: string;
-  imageUrl: URL;
-  file: File[];
-  location?: string;
-  tags?: string;
-};
+  postId: string
+  caption: string
+  imageId: string
+  imageUrl: URL | string
+  file: File[]
+  location?: string
+  tags?: string
+}
 
 export type IUser = {
   id: string;

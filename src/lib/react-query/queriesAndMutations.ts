@@ -6,6 +6,10 @@ import {
 } from "@tanstack/react-query"; 
 import { createUserAccount, signInAccount, signOutAccount } from "../appwrite/api";
 import type { INewUser } from "@/types";
+// import { useQueryClient, useMutation } from "@tanstack/react-query"
+import { createPost, updatePost } from "@/lib/appwrite/api"
+import type { INewPost, IUpdatePost } from "@/types"
+import { QUERY_KEYS } from "@/lib/react-query/queryKeys";
 
 
 
@@ -30,3 +34,26 @@ export const useSignOutAccount = () => {
 };
 
 
+export const useCreatePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (post: INewPost) => createPost(post),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+    },
+  });
+};
+
+export const useUpdatePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (post: IUpdatePost) => updatePost(post),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
+      });
+    },
+  });
+};
