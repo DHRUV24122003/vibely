@@ -4,13 +4,43 @@ export type INavLink = {
   label: string;
 };
 
+// export type IPost = {
+//   $id: string
+//   caption: string
+//   location: string
+//   tags: string[]
+//   imageId: string
+//   imageUrl: string
+// }
+
+
+export type ICreator = {
+  $id: string
+  name: string
+  imageUrl?: string
+}
+
+// export type IPost = {
+//   $id: string
+//   $createdAt: string
+//   caption: string
+//   location: string
+//   tags: string[]
+//   imageId: string
+//   imageUrl: string
+//   creator: ICreator
+// }
+
 export type IPost = {
   $id: string
+  $createdAt: string
   caption: string
   location: string
   tags: string[]
   imageId: string
   imageUrl: string
+  likes: { $id: string }[]
+  creator: ICreator
 }
 
 export type IUpdateUser = {

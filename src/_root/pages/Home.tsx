@@ -1,12 +1,45 @@
-import React from 'react'
+//import React from 'react'
+//import type { Models } from "appwrite";
+import type { IPost } from "@/types"
 
+import Loader  from '@/components/shared/Loader';
+import PostCard from "@/components/shared/PostCard";
+import { useGetRecentPosts } from '@/lib/react-query/queriesAndMutations';
 const Home = () => {
-  const is
+    const {
+    data: posts,
+    isPending: isPostLoading,
+    isError: isErrorPosts,
+  } = useGetRecentPosts();
+
+  // const {
+  //   data: creators,
+  //   isLoading: isUserLoading,
+  //   isError: isErrorCreators,
+  // } = useGetUsers(10);
+
   return (
-    <div className="flex flex-1">
+    <div className="flex flex-1">   
       <div className="home-container">
         <div className="home-posts">
           <h2 className="h3-bold md:h2-bold text-left w-full">Home Feed</h2>
+           {isPostLoading && !posts ? (
+            <Loader/>
+           ) : (
+            <ul className="flex flex-col flex-1 gap-9 w-full ">
+              {/* {posts?.documents.map((post: Models.Document) => (
+                <li key={post.$id} className="flex justify-center w-full">
+                  <PostCard post={post} /> */}
+
+                  {posts?.documents.map((post) => (
+                 <li key={post.$id} className="flex justify-center w-full">
+                 <PostCard post={post as unknown as IPost} />
+                
+                  
+                </li>
+              ))}
+            </ul>
+           )}
           </div>
           </div>
           </div>
