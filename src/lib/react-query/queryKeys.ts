@@ -35,6 +35,8 @@ export const QUERY_KEYS = {
   GET_USER_POSTS: "getUserPosts",
   GET_FILE_PREVIEW: "getFilePreview",
   SEARCH_POSTS: "getSearchPosts",
+  GET_INFINITE_POSTS: "getInfinitePosts",
+//SEARCH_POSTS: "getSearchPosts",
 } as const
 
 

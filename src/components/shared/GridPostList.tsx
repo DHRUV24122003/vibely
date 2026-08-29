@@ -1,14 +1,21 @@
-import { Models } from "appwrite";
+//import { Models } from "appwrite";
 import { Link } from "react-router-dom";
-
-import { PostStats } from "@/components/shared";
+import type { IPost } from "@/types"
+import PostStats  from "@/components/shared/PostStats";
 import { useUserContext } from "@/context/AuthContext";
 
+// type GridPostListProps = {
+//   posts: Models.Document[];
+//   showUser?: boolean;
+//   showStats?: boolean;
+// };
+
+
 type GridPostListProps = {
-  posts: Models.Document[];
-  showUser?: boolean;
-  showStats?: boolean;
-};
+  posts: IPost[]
+  showUser?: boolean
+  showStats?: boolean
+}
 
 const GridPostList = ({
   posts,

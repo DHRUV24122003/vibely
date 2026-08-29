@@ -1,8 +1,9 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-
+import type { IPost } from "@/types"
 import { Button } from "@/components/ui";
-import  Loader  from "@/components/shared/Loader  ";
-import { GridPostList, PostStats } from "@/components/shared";
+import  Loader  from "@/components/shared/Loader";
+import  GridPostList  from "@/components/shared/GridPostList";
+import PostStats from "@/components/shared/PostStats";
 
 import {
   useGetPostById,
@@ -13,7 +14,7 @@ import { multiFormatDateString } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 
 const PostDetails = () => {
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUserContext();
 
@@ -121,7 +122,8 @@ const PostDetails = () => {
             <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
               <p>{post?.caption}</p>
               <ul className="flex gap-1 mt-2">
-                {post?.tags.map((tag: string, index: string) => (
+                {/* {post?.tags.map((tag: string, index: string) => ( */}
+                {post?.tags?.map((tag: string, index: number) => (
                   <li
                     key={`${tag}${index}`}
                     className="text-light-3 small-regular">
@@ -132,7 +134,8 @@ const PostDetails = () => {
             </div>
 
             <div className="w-full">
-              <PostStats post={post} userId={user.id} />
+              {/* <PostStats post={post} userId={user.id} /> */}
+              <PostStats post={post as unknown as IPost} userId={user.id} />
             </div>
           </div>
         </div>
@@ -147,7 +150,8 @@ const PostDetails = () => {
         {isUserPostLoading || !relatedPosts ? (
           <Loader />
         ) : (
-          <GridPostList posts={relatedPosts} />
+          // <GridPostList posts={relatedPosts} />
+          <GridPostList posts={(relatedPosts as unknown as IPost[]) || []} />
         )}
       </div>
     </div>
