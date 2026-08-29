@@ -13,7 +13,7 @@ const EditPost = () => {
       <div className="flex-center w-full h-full">
         <Loader />
       </div>
-    );
+    ); 
 
   return (
     <div className="flex flex-1">
