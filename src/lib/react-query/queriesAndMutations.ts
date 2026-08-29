@@ -4,7 +4,7 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query"; 
-import { createUserAccount, signInAccount, signOutAccount,getRecentPosts ,likePost,savePost,deleteSavedPost,getCurrentUser, getSavedPostRecord } from "../appwrite/api";
+import { createUserAccount, signInAccount, signOutAccount,getRecentPosts ,likePost,savePost,deleteSavedPost,getCurrentUser, getSavedPostRecord, getPostById } from "../appwrite/api";
 import type { INewUser } from "@/types";
 // import { useQueryClient, useMutation } from "@tanstack/react-query"
 import { createPost, updatePost } from "@/lib/appwrite/api"
@@ -181,3 +181,14 @@ export const useGetSavedPostRecord = (userId: string, postId: string) => {
     enabled: !!userId && !!postId,
   })
 }
+
+
+
+
+export const useGetPostById = (postId?: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_POST_BY_ID, postId],
+    queryFn: () => getPostById(postId),
+    enabled: !!postId,
+  });
+};

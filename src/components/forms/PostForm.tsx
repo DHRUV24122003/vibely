@@ -120,7 +120,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
                 <FileUploader
                 fieldChange={field.onChange}
                 mediaUrl={post?.imageUrl || ""}
-                />
+                /> 
               </FormControl>
               <FormMessage className="shad-form_message" />
             </FormItem>
