@@ -241,13 +241,11 @@ export async function createPost(post: INewPost) {
 }
 
 export async function updatePost(post: IUpdatePost) {
-  const hasFileToUpdate = post.file.length > 0
+  const hasFileToUpdate = post.file && post.file.length > 0
 
   try {
-    let image = {
-      imageUrl: post.imageUrl,
-      imageId: post.imageId,
-    }
+    let imageUrl = String(post.imageUrl)
+    let imageId = String(post.imageId)
 
     if (hasFileToUpdate) {
       const uploadedFile = await uploadFile(post.file[0])
@@ -259,28 +257,28 @@ export async function updatePost(post: IUpdatePost) {
         throw Error
       }
 
-      image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id }
+      imageUrl = String(fileUrl)
+      imageId = uploadedFile.$id
     }
 
-    const tags = post.tags?.replace(/ /g, "").split(",") || []
+    const payload = {
+      caption: post.caption,
+      location: post.location || "",
+      imageUrl,
+      imageId,
+    }
+
+    console.log("UPDATE PAYLOAD", payload)
 
     const updatedPost = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
       post.postId,
-      {
-        caption: post.caption,
-        imageUrl: image.imageUrl,
-        imageId: image.imageId,
-        location: post.location,
-        tags: tags,
-      }
+      payload
     )
 
     if (!updatedPost) {
-      if (hasFileToUpdate) {
-        await deleteFile(image.imageId)
-      }
+      if (hasFileToUpdate) await deleteFile(imageId)
       throw Error
     }
 
@@ -290,10 +288,10 @@ export async function updatePost(post: IUpdatePost) {
 
     return updatedPost
   } catch (error) {
-    console.log(error)
+    console.log("UPDATE ERROR", error)
+    throw error
   }
 }
-
 
 export async function getRecentPosts() {
   try {
@@ -424,6 +422,47 @@ export async function deletePost(postId?: string, imageId?: string) {
     await deleteFile(imageId);
 
     return { status: "Ok" };
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+export async function getInfinitePosts({ pageParam }: { pageParam: number }) {
+  const queries: any[] = [Query.orderDesc("$updatedAt"), Query.limit(9)];
+
+  if (pageParam) {
+    queries.push(Query.cursorAfter(pageParam.toString()));
+  }
+
+  try {
+    const posts = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      queries
+    );
+
+    if (!posts) throw Error;
+ 
+    return posts;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+export async function searchPosts(searchTerm: string) {
+  try {
+    const posts = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [Query.search("caption", searchTerm)]
+    );
+
+    if (!posts) throw Error;
+
+    return posts;
   } catch (error) {
     console.log(error);
   }
