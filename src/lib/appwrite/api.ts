@@ -67,48 +67,7 @@ export async function signInAccount(user: { email: string; password: string }) {
 }
 
 
-// export async function getCurrentUser() {
-//   try {
-//     const currentAccount = await account.get();
 
-//     if (!currentAccount) throw Error;
-
-//     const currentUser = await databases.listDocuments(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.userCollectionId,
-//       [Query.equal("accountId", currentAccount.$id)]
-//     );
-
-//     if (!currentUser) throw Error;
-
-//     return currentUser.documents[0];
-//   } catch (error) {
-//     console.log(error);
-//     return null;
-//   }
-// }
-
-
-// export async function getCurrentUser() {
-//   try {
-//     const currentAccount = await getAccount();
-
-//     if (!currentAccount) throw Error;
-
-//     const currentUser = await databases.listDocuments(
-//       appwriteConfig.databaseId,
-//       appwriteConfig.userCollectionId,
-//       [Query.equal("accountId", currentAccount.$id)]
-//     );
-
-//     if (!currentUser) throw Error;
-
-//     return currentUser.documents[0];
-//   } catch (error) {
-//     console.log(error);
-//     return null;
-//   }
-// }
 
 
 export async function getCurrentUser() {
@@ -261,11 +220,28 @@ export async function updatePost(post: IUpdatePost) {
       imageId = uploadedFile.$id
     }
 
+    // const tags =
+    // post.tags
+    // ?.split(",")
+    // .map((tag) => tag.trim())
+    // .filter(Boolean) || []
+
+    const normalizeTags = (value?: string | string[]) => {
+  const raw = Array.isArray(value) ? value.join(",") : value || ""
+  return raw
+    .split(",")
+    .map((tag) => tag.trim().replace(/^#/, ""))
+    .filter(Boolean)
+}
+
+const tags = normalizeTags(post.tags)
+
     const payload = {
       caption: post.caption,
       location: post.location || "",
       imageUrl,
       imageId,
+      tags,
     }
 
     console.log("UPDATE PAYLOAD", payload)
@@ -293,22 +269,44 @@ export async function updatePost(post: IUpdatePost) {
   }
 }
 
+// export async function getRecentPosts() {
+//   try {
+//     const posts = await databases.listDocuments(
+//       appwriteConfig.databaseId,
+//       appwriteConfig.postCollectionId,
+//       [Query.orderDesc("$createdAt"), Query.limit(20)]
+//     );
+
+//     if (!posts) throw Error;
+
+//     return posts;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+
+
+
 export async function getRecentPosts() {
   try {
     const posts = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
       [Query.orderDesc("$createdAt"), Query.limit(20)]
-    );
+    )
 
-    if (!posts) throw Error;
+    if (!posts) throw Error
 
-    return posts;
+    const documents = await Promise.all(
+      posts.documents.map((post) => populateCreator(post))
+    )
+
+    return { ...posts, documents }
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 }
-
 
 
 export async function likePost(postId: string, likesArray: string[]) {
@@ -484,5 +482,24 @@ export async function getUserPosts(userId?: string) {
     return post;
   } catch (error) {
     console.log(error);
+  }
+}
+
+
+
+async function populateCreator(post: any) {
+  if (!post?.creator || typeof post.creator !== "string") {
+    return post
+  }
+
+  try {
+    const creator = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      post.creator
+    )
+    return { ...post, creator }
+  } catch {
+    return post
   }
 }

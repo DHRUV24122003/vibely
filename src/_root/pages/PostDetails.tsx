@@ -32,7 +32,8 @@ const PostDetails = () => {
     deletePost({ postId: id, imageId: post?.imageId });
     navigate(-1);
   };
-
+  const creatorId =
+  typeof post?.creator === "string" ? post.creator : post?.creator?.$id
   return (
     <div className="post_details-container">
       <div className="hidden md:flex max-w-5xl w-full">
@@ -89,7 +90,7 @@ const PostDetails = () => {
                 </div>
               </Link>
 
-              <div className="flex-center gap-4">
+              {/* <div className="flex-center gap-4">
                 <Link
                   to={`/update-post/${post?.$id}`}
                   className={`${user.id !== post?.creator.$id && "hidden"}`}>
@@ -99,7 +100,24 @@ const PostDetails = () => {
                     width={24}
                     height={24}
                   />
-                </Link>
+                </Link> */}
+                 <div className="flex-center gap-4">
+  <Link
+    to={`/update-post/${post?.$id}`}
+    className={`${user.id !== creatorId ? "hidden" : ""}`}
+  >
+    <img
+      src="/assets/icons/edit.svg"
+      alt="edit"
+      width={24}
+      height={24}
+      className="[filter:invert(48%)_sepia(78%)_saturate(1800%)_hue-rotate(220deg)_brightness(100%)]"
+    />
+  </Link>
+
+
+
+                
 
                 <Button
                   onClick={handleDeletePost}
@@ -127,7 +145,7 @@ const PostDetails = () => {
                   <li
                     key={`${tag}${index}`}
                     className="text-light-3 small-regular">
-                    #{tag}
+                    {tag}
                   </li>
                 ))}
               </ul>
