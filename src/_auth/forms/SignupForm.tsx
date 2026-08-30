@@ -187,31 +187,4 @@ export default SignupForm
 
 
 
-//   setIsLoading(true)
-
-  // try {
-  //   const newUser = await createUserAccount(values)
-  //   console.log(newUser)
-
-  //   if (!newUser) {
-  //     toast({
-  //       title: "Sign up failed. Please try again.",
-  //     })
-  //     return
-  //   }
-
-  //   toast({
-  //     title: "Account created successfully!",
-  //   })
-
-  // } catch (error) {
-  //   console.log(error)
-  //   toast({
-  //     title: "Something went wrong.",
-  //     variant: "destructive",
-  //   })
-  // } finally {
-  //   setIsLoading(false)
-  // }
-
 
