@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+//import { useState } from "react"
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input" 
@@ -23,7 +23,7 @@ const SignupForm = () => {
   const {toast} = useToast()
   const {checkAuthUser, isLoading: isUserLoading} = useUserContext();
   const { mutateAsync: createUserAccount, isPending: isCreatingAccount } = useCreateUserAccount();
-    const { mutateAsync: signInAccount, isPending: isSigningInUser } = useSignInAccount();
+  const { mutateAsync: signInAccount, isPending: isSigningInUser } = useSignInAccount();
 
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -57,33 +57,24 @@ if (!session) {
         
         return;
       }
-      const isLoggedIn = await checkAuthUser();
 
-      if (isLoggedIn) {
+
+  const isLoggedIn = await checkAuthUser();
+    if (isLoggedIn) {
         form.reset();
-
         navigate("/");
       } else {
         toast({ title: "Login failed. Please try again.", });
-        
         return;
       }
     } catch (error) {
       console.log({ error });
     }
-  };
-
-
-      
-
-
+  }
   
 
 
-
-  
-
-  return (
+    return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
         <img src="/assets/images/logo.svg" alt="logo" className="w-24 h-24" />
@@ -171,7 +162,7 @@ if (!session) {
               to="/sign-in"
               className="text-primary-500 text-small-semibold ml-1"
             >
-              Log in
+              Sign in
             </Link>
           </p>
         </form>
@@ -179,6 +170,7 @@ if (!session) {
     </Form>
   )
 }
+
 
 export default SignupForm
 
