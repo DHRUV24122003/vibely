@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
-//import { useState } from "react"
+
 //import { useState } from "react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input" 
@@ -19,8 +19,10 @@ import { useUserContext } from "@/context/AuthContext"
 
 const SignupForm = () => { 
 //const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate();
-  const {toast} = useToast()
+  const navigate = useNavigate(); //to change the route after successful signup(to change the page)
+  const {toast} = useToast()//to show the toast message after successful signup
+  //checkAuthUser = "abhi logged in user kaun hai?" check karke state update
+  // isUserLoading = rename karke isUserLoading (yahan button mein use nahi)
   const {checkAuthUser, isLoading: isUserLoading} = useUserContext();
   const { mutateAsync: createUserAccount, isPending: isCreatingAccount } = useCreateUserAccount();
   const { mutateAsync: signInAccount, isPending: isSigningInUser } = useSignInAccount();
@@ -47,14 +49,11 @@ if(!newUser){
 const session = await signInAccount({
   email : values.email,
   password:values.password,
-
-
 })
+
 if (!session) {
         toast({ title: "Something went wrong. Please login your new account", });
-        
         navigate("/sign-in");
-        
         return;
       }
 
@@ -147,7 +146,7 @@ if (!session) {
           />
 
           <Button type="submit" className="shad-button_primary">
-            {isCreatingAccount ? (
+            {isCreatingAccount || isSigningInUser || isUserLoading ? (
               <div className="flex-center gap-2">
                 <Loader /> Loading...
               </div>

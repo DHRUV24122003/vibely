@@ -1,24 +1,24 @@
-// import type { INewUser } from "@/types";
-import type { IUpdatePost, INewPost, INewUser } from "@/types";
 
+import type { IUpdatePost, INewPost, INewUser } from "@/types";
 import { account, appwriteConfig, avatars, databases,storage } from "./config";
 import { ID, Query } from "appwrite";
 
 
 
 export async function createUserAccount(user: INewUser) {
+  // Create a new user account in Appwrite and save the user data to the database
   try {
     const newAccount = await account.create(
       ID.unique(),
       user.email,
       user.password,
-      user.name
+      user.name,
+      
     );
 
     if (!newAccount) throw Error;
-
+    //  default avatar URL from name
     const avatarUrl = avatars.getInitials(user.name);
-
     const newUser = await saveUserToDB({
       accountId: newAccount.$id,
       name: newAccount.name,
@@ -28,6 +28,7 @@ export async function createUserAccount(user: INewUser) {
     });
 
     return newUser;
+     
   } catch (error) {
     console.log(error);
     return error;
@@ -35,6 +36,10 @@ export async function createUserAccount(user: INewUser) {
 }
 
 
+
+
+
+//this function saves the user data to the database after creating the account in Appwrite in a new row of users table
 export async function saveUserToDB(user: {
   accountId: string;
   email: string;
@@ -55,6 +60,8 @@ export async function saveUserToDB(user: {
     console.log(error);
   }
 }
+
+
 
 export async function signInAccount(user: { email: string; password: string }) {
   try {
