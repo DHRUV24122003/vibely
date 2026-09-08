@@ -5,10 +5,10 @@ import {
   useInfiniteQuery,
   
 } from "@tanstack/react-query"; 
-import { createUserAccount, signInAccount,getInfinitePosts,signOutAccount,searchPosts,getRecentPosts ,likePost,savePost,deleteSavedPost,getCurrentUser, getSavedPostRecord, getPostById, deletePost, getUserPosts } from "../appwrite/api";
+import { createPost, updatePost, createUserAccount, signInAccount,getInfinitePosts,signOutAccount,searchPosts,getRecentPosts ,likePost,savePost,deleteSavedPost,getCurrentUser, getSavedPostRecord, getPostById, deletePost, getUserPosts } from "../appwrite/api";
 import type { INewUser } from "@/types";
 // import { useQueryClient, useMutation } from "@tanstack/react-query"
-import { createPost, updatePost } from "@/lib/appwrite/api"
+//import { createPost, updatePost } from "@/lib/appwrite/api"
 import type { INewPost, IUpdatePost } from "@/types"
 import { QUERY_KEYS } from "@/lib/react-query/queryKeys";
 
