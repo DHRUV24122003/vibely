@@ -1,542 +1,335 @@
-
-
-
-
-// //import type { Models } from "appwrite"
-// import { useState, useEffect } from "react"
-// import { useLocation } from "react-router-dom"
-
-// import { checkIsLiked } from "@/lib/utils"
-// import {
-//   useLikePost,
-//   useSavePost,
-//   useDeleteSavedPost,
-//   useGetCurrentUser,
-// } from "@/lib/react-query/queriesAndMutations"
-
-// type SavedRecord = {
-//   $id: string
-//   post?: { $id: string }
-// }
-
-// type CurrentUserWithSaves = {
-//   save?: SavedRecord[]
-// }
-
-// // type PostStatsProps = {
-// //   post: Models.Document & {
-// //     likes: { $id: string }[]
-// //     $id: string
-// //   }
-// //   userId: string
-// // }
-
-// import type { IPost } from "@/types"
-// import { Loader } from "lucide-react"
-
-// type PostStatsProps = {
-//   post: IPost
-//   userId: string
-// } 
-
-// const PostStats = ({ post, userId }: PostStatsProps) => {
-//   const location = useLocation()
-// //   const likesList = post.likes.map((user) => user.$id)
-// const likesList = post.likes?.map((user) => user.$id) || []
-
-//   const [likes, setLikes] = useState<string[]>(likesList) 
-//   const [isSaved, setIsSaved] = useState(false)
-
-//   const { mutate: likePost } = useLikePost()
-//   const { mutate: savePost , isPending : isSavingPost} = useSavePost()
-//   const { mutate: deleteSavedPost , isPending : isDeletingSaved} = useDeleteSavedPost()
-
-//   const { data: currentUser } = useGetCurrentUser()
-
-//   const savedPostRecord = (currentUser as CurrentUserWithSaves | undefined)?.save?.find(
-//     (record) => record.post?.$id === post.$id
-//   )
-
-//   useEffect(() => {
-//     setIsSaved(!!savedPostRecord)
-//   }, [currentUser, savedPostRecord])
-
-//   const handleLikePost = (
-//     e: React.MouseEvent<HTMLImageElement, MouseEvent>
-//   ) => {
-//     e.stopPropagation()
-
-//     let likesArray = [...likes]
-
-//     if (likesArray.includes(userId)) {
-//       likesArray = likesArray.filter((id) => id !== userId)
-//     } else {
-//       likesArray.push(userId)
-//     }
-
-//     setLikes(likesArray)
-//     likePost({ postId: post.$id, likesArray })
-//   }
-
-//   const handleSavePost = (
-//     e: React.MouseEvent<HTMLImageElement, MouseEvent>
-//   ) => {
-//     e.stopPropagation()
-
-//     if (savedPostRecord) {
-//       setIsSaved(false)
-//       return deleteSavedPost(savedPostRecord.$id)
-//     }
-
-//     savePost({ userId, postId: post.$id })
-//     setIsSaved(true)
-//   }
-
-//   const containerStyles = location.pathname.startsWith("/profile")
-//     ? "w-full"
-//     : ""
-
-//   return (
-//     <div className={`flex justify-between items-center z-20 ${containerStyles}`}>
-//       <div className="flex gap-2 mr-5">
-//        <img
-        
-//           src={
-//             checkIsLiked(likes, userId)
-//               ? "/assets/icons/liked.svg"
-//               : "/assets/icons/like.svg"
-//           }
-//           alt="like"
-//           width={20}
-//           height={20}
-//           onClick={handleLikePost}
-//           className="cursor-pointer"
-//         />
-//         <p className="small-medium lg:base-medium">{likes.length}</p>
-//       </div>
-
-//       <div className="flex gap-2">
-//         {isSavingPost || isDeletingSaved ? <Loader/> : 
-//         <img
-//           src={isSaved ? "/assets/icons/saved.svg" : "/assets/icons/save.svg"}
-//           alt="save"
-//           width={20}
-//           height={20}
-//           className="cursor-pointer"
-//           onClick={handleSavePost}
-//         />}
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default PostStats
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useState, useEffect } from "react"
-// import { useLocation } from "react-router-dom"
-
-// import { checkIsLiked } from "@/lib/utils"
-// import {
-//   useLikePost,
-//   useSavePost,
-//   useDeleteSavedPost,
-//   useGetCurrentUser,
-// } from "@/lib/react-query/queriesAndMutations"
-// import type { IPost } from "@/types"
-// import Loader from "@/components/shared/Loader"
-
-// type SavedRecord = {
-//   $id: string
-//   post?: { $id: string } | string
-// }
-
-// type CurrentUserWithSaves = {
-//   save?: SavedRecord[]
-// }
-
-// type PostStatsProps = {
-//   post: IPost
-//   userId: string
-// }
-
-// const getSavedPostId = (record: SavedRecord) =>
-//   typeof record.post === "string" ? record.post : record.post?.$id
-
-// const PostStats = ({ post, userId }: PostStatsProps) => {
-//   const location = useLocation()
-//   const likesList = post.likes?.map((user) => user.$id) || []
-
-//   const [likes, setLikes] = useState<string[]>(likesList)
-//   const [isSaved, setIsSaved] = useState(false)
-//   const [savedRecordId, setSavedRecordId] = useState<string | undefined>()
-
-//   const { mutate: likePost } = useLikePost()
-//   const { mutate: savePost, isPending: isSavingPost } = useSavePost()
-//   const { mutate: deleteSavedPost, isPending: isDeletingSaved } = useDeleteSavedPost()
-
-//   const { data: currentUser } = useGetCurrentUser()
-
-//   useEffect(() => {
-//     const record = (currentUser as CurrentUserWithSaves | undefined)?.save?.find(
-//       (item) => getSavedPostId(item) === post.$id
-//     )
-
-//     setIsSaved(!!record)
-//     setSavedRecordId(record?.$id)
-//   }, [currentUser, post.$id])
-
-//   const handleLikePost = (
-//     e: React.MouseEvent<HTMLImageElement, MouseEvent>
-//   ) => {
-//     e.stopPropagation()
-
-//     let likesArray = [...likes]
-
-//     if (likesArray.includes(userId)) {
-//       likesArray = likesArray.filter((id) => id !== userId)
-//     } else {
-//       likesArray.push(userId)
-//     }
-
-//     setLikes(likesArray)
-//     likePost({ postId: post.$id, likesArray })
-//   }
-
-//   const handleSavePost = (
-//     e: React.MouseEvent<HTMLImageElement, MouseEvent>
-//   ) => {
-//     e.stopPropagation()
-
-//     if (savedRecordId) {
-//       setIsSaved(false)
-//       setSavedRecordId(undefined)
-//       deleteSavedPost(savedRecordId)
-//       return
-//     }
-
-//     setIsSaved(true)
-//     savePost({ userId, postId: post.$id })
-//   }
-
-//   const containerStyles = location.pathname.startsWith("/profile")
-//     ? "w-full"
-//     : ""
-
-//   return (
-//     <div className={`flex justify-between items-center z-20 ${containerStyles}`}>
-//       <div className="flex gap-2 mr-5">
-//         <img
-//           src={
-//             checkIsLiked(likes, userId)
-//               ? "/assets/icons/liked.svg"
-//               : "/assets/icons/like.svg"
-//           }
-//           alt="like"
-//           width={20}
-//           height={20}
-//           onClick={handleLikePost}
-//           className="cursor-pointer"
-//         />
-//         <p className="small-medium lg:base-medium">{likes.length}</p>
-//       </div>
-
-//             <div className="flex gap-2">
-//         {isSavingPost || isDeletingSaved ? <Loader/> : 
-//         <img
-//           src={isSaved ? "/assets/icons/saved.svg" : "/assets/icons/save.svg"}
-//           alt="save"
-//           width={20}
-//           height={20}
-//           onClick={handleSavePost}
-//           className="cursor-pointer"
-          
-//         />}
-//       </div>
-//     </div>
-//   )
-// }
-
-
-// export default PostStats
-
-
-
-
-
-// import { useEffect, useState } from "react"
-// import { useLocation } from "react-router-dom"
-
-// import { checkIsLiked } from "@/lib/utils"
-// import {
-//   useLikePost,
-//   useSavePost,
-//   useDeleteSavedPost,
-//   useGetSavedPostRecord,
-// } from "@/lib/react-query/queriesAndMutations"
-// import type { IPost } from "@/types"
-// import Loader from "@/components/shared/Loader"
-
-// type PostStatsProps = {
-//   post: IPost
-//   userId: string
-// }
-
-// const PostStats = ({ post, userId }: PostStatsProps) => {
-//   const location = useLocation()
-//   const likesList = post.likes?.map((user) => user.$id) || []
-
-//   const [likes, setLikes] = useState<string[]>(likesList)
-//   const [isSaved, setIsSaved] = useState(false)
-//   const [savedRecordId, setSavedRecordId] = useState<string | undefined>()
-
-//   const { mutate: likePost } = useLikePost()
-//   const { mutate: savePost, isPending: isSavingPost } = useSavePost()
-//   const { mutate: deleteSavedPost, isPending: isDeletingSaved } =
-//     useDeleteSavedPost()
-
-//   const { data: savedRecord } = useGetSavedPostRecord(userId, post.$id)
-
-//   useEffect(() => {
-//     if (savedRecord?.$id) {
-//       setIsSaved(true)
-//       setSavedRecordId(savedRecord.$id)
-//     } else {
-//       setIsSaved(false)
-//       setSavedRecordId(undefined)
-//     }
-//   }, [savedRecord])
-
-//   const handleLikePost = (
-//     e: React.MouseEvent<HTMLImageElement, MouseEvent>
-//   ) => {
-//     e.stopPropagation()
-
-//     let likesArray = [...likes]
-
-//     if (likesArray.includes(userId)) {
-//       likesArray = likesArray.filter((id) => id !== userId)
-//     } else {
-//       likesArray.push(userId)
-//     }
-
-//     setLikes(likesArray)
-//     likePost({ postId: post.$id, likesArray })
-//   }
-
-//   const handleSavePost = (
-//     e: React.MouseEvent<HTMLImageElement, MouseEvent>
-//   ) => {
-//     e.stopPropagation()
-
-//     if (isSaved && savedRecordId) {
-//       const idToDelete = savedRecordId
-//       setIsSaved(false)
-//       setSavedRecordId(undefined)
-//       deleteSavedPost(idToDelete)
-//       return
-//     }
-
-//     setIsSaved(true)
-//     savePost(
-//       { userId, postId: post.$id },
-//       {
-//         onSuccess: (data) => {
-//           if (data?.$id) setSavedRecordId(data.$id)
-//         },
-//         onError: () => {
-//           setIsSaved(false)
-//           setSavedRecordId(undefined)
-//         },
-//       }
-//     )
-//   }
-
-//   const containerStyles = location.pathname.startsWith("/profile")
-//     ? "w-full"
-//     : ""
-
-//   return (
-//     <div className={`flex justify-between items-center z-20 ${containerStyles}`}>
-//       <div className="flex gap-2 mr-5">
-//         <img
-//           src={
-//             checkIsLiked(likes, userId)
-//               ? "/assets/icons/liked.svg"
-//               : "/assets/icons/like.svg"
-//           }
-//           alt="like"
-//           width={20}
-//           height={20}
-//           onClick={handleLikePost}
-//           className="cursor-pointer"
-//         />
-//         <p className="small-medium lg:base-medium">{likes.length}</p>
-//       </div>
-
-//       <div className="flex gap-2">
-//         {isSavingPost || isDeletingSaved ? (
-//           <Loader />
-//         ) : (
-//           <img
-//             src={isSaved ? "/assets/icons/saved.svg" : "/assets/icons/save.svg"}
-//             alt="save"
-//             width={20}
-//             height={20}
-//             className="cursor-pointer"
-//             onClick={handleSavePost}
-//           />
-//         )}
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default PostStats
-
-
-
-
-import { useState } from "react"
-import { useLocation } from "react-router-dom"
-import { useQueryClient } from "@tanstack/react-query"
-
-import { checkIsLiked } from "@/lib/utils"
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { checkIsLiked } from "@/lib/utils";
 import {
   useLikePost,
   useSavePost,
   useDeleteSavedPost,
   useGetSavedPostRecord,
-} from "@/lib/react-query/queriesAndMutations"
-import { QUERY_KEYS } from "@/lib/react-query/queryKeys"
-import type { IPost } from "@/types"
-import Loader from "@/components/shared/Loader"
+} from "@/lib/react-query/queriesAndMutations";
+
+import { QUERY_KEYS } from "@/lib/react-query/queryKeys";
+import type { IPost } from "@/types";
+import Loader from "@/components/shared/Loader";
 
 type PostStatsProps = {
-  post: IPost
-  userId: string
-}
+  post: IPost;
+  userId: string;
+};
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
-  const location = useLocation()
-  const queryClient = useQueryClient()
-  const queryKey = [QUERY_KEYS.GET_CURRENT_USER, "saved", userId, post.$id]
+  const location = useLocation();
+  const queryClient = useQueryClient();
 
-  const likesList = post.likes?.map((user) => user.$id) || []
-  const [likes, setLikes] = useState<string[]>(likesList)
+  const queryKey = [
+    QUERY_KEYS.GET_CURRENT_USER,
+    "saved",
+    userId,
+    post.$id,
+  ];
 
-  const { data: savedRecord, isFetched } = useGetSavedPostRecord(userId, post.$id)
-  const [optimisticSaved, setOptimisticSaved] = useState<boolean | null>(null)
-  const [savedRecordId, setSavedRecordId] = useState<string | undefined>()
+  const likesList = post.likes?.map((user) => user.$id) || [];
 
-  const isSaved = optimisticSaved ?? !!savedRecord?.$id
-  const recordId = savedRecordId || savedRecord?.$id
+  const [likes, setLikes] = useState<string[]>(likesList);
 
-  const { mutate: likePost } = useLikePost()
-  const { mutate: savePost, isPending: isSavingPost } = useSavePost()
-  const { mutate: deleteSavedPost, isPending: isDeletingSaved } =
-    useDeleteSavedPost()
+  const { data: savedRecord, isFetched } = useGetSavedPostRecord(
+    userId,
+    post.$id
+  );
 
+  const [optimisticSaved, setOptimisticSaved] =
+    useState<boolean | null>(null);
+
+  const [savedRecordId, setSavedRecordId] =
+    useState<string | undefined>();
+
+  const isSaved = optimisticSaved ?? !!savedRecord?.$id;
+
+  const recordId = savedRecordId || savedRecord?.$id;
+
+  const { mutate: likePost } = useLikePost();
+
+  const {
+    mutate: savePost,
+    isPending: isSavingPost,
+  } = useSavePost();
+
+  const {
+    mutate: deleteSavedPost,
+    isPending: isDeletingSaved,
+  } = useDeleteSavedPost();
+
+  // -----------------------------
+  // LIKE POST
+  // -----------------------------
   const handleLikePost = (
-    e: React.MouseEvent<HTMLImageElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
-    let likesArray = [...likes]
+    let likesArray = [...likes];
+
     if (likesArray.includes(userId)) {
-      likesArray = likesArray.filter((id) => id !== userId)
+      likesArray = likesArray.filter((id) => id !== userId);
     } else {
-      likesArray.push(userId)
+      likesArray.push(userId);
     }
 
-    setLikes(likesArray)
-    likePost({ postId: post.$id, likesArray })
-  }
+    setLikes(likesArray);
 
+    likePost({
+      postId: post.$id,
+      likesArray,
+    });
+  };
+
+  // -----------------------------
+  // SAVE POST
+  // -----------------------------
   const handleSavePost = (
-    e: React.MouseEvent<HTMLImageElement, MouseEvent>
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     if (isSaved && recordId) {
-      setOptimisticSaved(false)
-      setSavedRecordId(undefined)
-      queryClient.setQueryData(queryKey, null)
+      setOptimisticSaved(false);
+      setSavedRecordId(undefined);
+
+      queryClient.setQueryData(queryKey, null);
 
       deleteSavedPost(recordId, {
         onError: () => {
-          setOptimisticSaved(true)
-          setSavedRecordId(recordId)
+          setOptimisticSaved(true);
+          setSavedRecordId(recordId);
         },
-      })
-      return
+      });
+
+      return;
     }
 
-    setOptimisticSaved(true)
+    setOptimisticSaved(true);
+
     savePost(
-      { userId, postId: post.$id },
+      {
+        userId,
+        postId: post.$id,
+      },
       {
         onSuccess: (data) => {
           if (data?.$id) {
-            setSavedRecordId(data.$id)
-            queryClient.setQueryData(queryKey, data)
+            setSavedRecordId(data.$id);
+
+            queryClient.setQueryData(
+              queryKey,
+              data
+            );
           }
         },
+
         onError: () => {
-          setOptimisticSaved(false)
-          setSavedRecordId(undefined)
+          setOptimisticSaved(false);
+          setSavedRecordId(undefined);
         },
       }
-    )
-  }
+    );
+  };
 
-  const containerStyles = location.pathname.startsWith("/profile") ? "w-full" : ""
+  const containerStyles =
+    location.pathname.startsWith("/profile")
+      ? "w-full"
+      : "";
+
+  const isLiked = checkIsLiked(likes, userId);
 
   return (
-    <div className={`flex justify-between items-center z-20 ${containerStyles}`}>
-      <div className="flex gap-2 mr-5">
-        <img
-          src={
-            checkIsLiked(likes, userId)
-              ? "/assets/icons/liked.svg"
-              : "/assets/icons/like.svg"
-          }
-          alt="like"
-          width={20}
-          height={20}
+    <div
+      className={`flex items-center justify-between ${containerStyles}`}
+    >
+      {/* LEFT ACTIONS */}
+      <div className="flex items-center gap-2">
+
+        {/* LIKE */}
+        <button
+          type="button"
           onClick={handleLikePost}
-          className="cursor-pointer"
-        />
-        <p className="small-medium lg:base-medium">{likes.length}</p>
+          className={`
+            group/like flex h-10 items-center gap-2
+            rounded-full px-3
+            transition-all duration-200
+            ${
+              isLiked
+                ? "bg-rose-500/10"
+                : "hover:bg-white/[0.05]"
+            }
+          `}
+          aria-label={isLiked ? "Unlike post" : "Like post"}
+        >
+          <img
+            src={
+              isLiked
+                ? "/assets/icons/liked.svg"
+                : "/assets/icons/like.svg"
+            }
+            alt=""
+            className="
+              h-[21px] w-[21px]
+              transition-transform duration-200
+              group-hover/like:scale-110
+              group-active/like:scale-90
+            "
+          />
+
+          <span
+            className={`
+              text-sm font-medium
+              ${
+                isLiked
+                  ? "text-rose-400"
+                  : "text-light-2"
+              }
+            `}
+          >
+            {likes.length}
+          </span>
+        </button>
+
+        {/* COMMENT / OPEN POST */}
+        <Link
+          to={`/posts/${post.$id}`}
+          className="
+            group/comment flex h-10 items-center gap-2
+            rounded-full px-3
+            text-light-2
+            transition-all duration-200
+            hover:bg-white/[0.05]
+            hover:text-white
+          "
+          aria-label="View post"
+        >
+          <div className="relative h-[21px] w-[21px]">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="
+                h-full w-full
+                transition-transform duration-200
+                group-hover/comment:scale-110
+              "
+            >
+              <path
+                d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8199 20 9.69282 19.7856 8.66044 19.3955L4 21L5.42993 16.7104C3.91358 15.3133 3 13.4683 3 11.5C3 6.80558 7.02944 3 12 3C16.9706 3 21 6.80558 21 11.5Z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+
+          <span className="hidden text-sm font-medium sm:inline">
+            Comment
+          </span>
+        </Link>
+
+        {/* SHARE - visual only for now */}
+        <button
+          type="button"
+          className="
+            group/share hidden h-10 items-center gap-2
+            rounded-full px-3
+            text-light-2
+            transition-all duration-200
+            hover:bg-white/[0.05]
+            hover:text-white
+            sm:flex
+          "
+          aria-label="Share post"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="
+              h-[20px] w-[20px]
+              transition-transform duration-200
+              group-hover/share:-translate-y-0.5
+              group-hover/share:translate-x-0.5
+            "
+          >
+            <path
+              d="M22 2L11 13"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            <path
+              d="M22 2L15 22L11 13L2 9L22 2Z"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+
+          <span className="text-sm font-medium">
+            Share
+          </span>
+        </button>
       </div>
 
-      <div className="flex gap-2">
+      {/* SAVE */}
+      <div className="flex h-10 w-10 items-center justify-center">
         {!isFetched || isSavingPost || isDeletingSaved ? (
-          <Loader />
+          <div className="scale-75">
+            <Loader />
+          </div>
         ) : (
-          <img
-            src={isSaved ? "/assets/icons/saved.svg" : "/assets/icons/save.svg"}
-            alt="save"
-            width={20}
-            height={20}
-            className="cursor-pointer"
+          <button
+            type="button"
             onClick={handleSavePost}
-          />
+            className={`
+              group/save flex h-10 w-10
+              items-center justify-center
+              rounded-full
+              transition-all duration-200
+              ${
+                isSaved
+                  ? "bg-purple-500/10"
+                  : "hover:bg-white/[0.05]"
+              }
+            `}
+            aria-label={
+              isSaved
+                ? "Remove saved post"
+                : "Save post"
+            }
+          >
+            <img
+              src={
+                isSaved
+                  ? "/assets/icons/saved.svg"
+                  : "/assets/icons/save.svg"
+              }
+              alt=""
+              className="
+                h-[21px] w-[21px]
+                transition-transform duration-200
+                group-hover/save:scale-110
+                group-active/save:scale-90
+              "
+            />
+          </button>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PostStats
+export default PostStats;

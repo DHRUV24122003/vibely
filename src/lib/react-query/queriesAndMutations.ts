@@ -1,11 +1,16 @@
 import {
+  
   useQuery,
   useMutation,
   useQueryClient,
   useInfiniteQuery,
   
 } from "@tanstack/react-query"; 
-import { createPost, updatePost, createUserAccount, signInAccount,getInfinitePosts,signOutAccount,searchPosts,getRecentPosts ,likePost,savePost,deleteSavedPost,getCurrentUser, getSavedPostRecord, getPostById, deletePost, getUserPosts } from "../appwrite/api";
+import { getUsers,followUser,
+unfollowUser,
+getFollowStatus,
+getFollowers,
+getFollowing,getUserById,createPost, updatePost, createUserAccount, signInAccount,getInfinitePosts,signOutAccount,searchPosts,getRecentPosts ,likePost,savePost,deleteSavedPost,getCurrentUser, getSavedPostRecord, getPostById, deletePost, getUserPosts } from "../appwrite/api";
 import type { INewUser } from "@/types";
 // import { useQueryClient, useMutation } from "@tanstack/react-query"
 //import { createPost, updatePost } from "@/lib/appwrite/api"
@@ -240,6 +245,157 @@ export const useGetUserPosts = (userId?: string) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_USER_POSTS, userId],
     queryFn: () => getUserPosts(userId),
+    enabled: !!userId,
+  });
+};
+
+
+// ============================== GET USERS
+
+export const useGetUsers = () => {
+  return useQuery({
+    queryKey: ["getUsers"],
+    queryFn: getUsers,
+  });
+};
+
+// ============================== GET USER BY ID
+
+export const useGetUserById = (userId?: string) => {
+  return useQuery({
+    queryKey: ["getUserById", userId],
+    queryFn: () => getUserById(userId),
+    enabled: !!userId,
+  });
+};
+
+
+
+
+// ============================== FOLLOW USER
+
+export const useFollowUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      followerId,
+      followingId,
+    }: {
+      followerId: string;
+      followingId: string;
+    }) => followUser(followerId, followingId),
+
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "followStatus",
+          variables.followerId,
+          variables.followingId,
+        ],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["followers", variables.followingId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["following", variables.followerId],
+      });
+    },
+  });
+};
+
+
+// ============================== UNFOLLOW USER
+
+export const useUnfollowUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      followerId,
+      followingId,
+    }: {
+      followerId: string;
+      followingId: string;
+    }) => unfollowUser(followerId, followingId),
+
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "followStatus",
+          variables.followerId,
+          variables.followingId,
+        ],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["followers", variables.followingId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["following", variables.followerId],
+      });
+    },
+  });
+};
+
+
+// ============================== FOLLOW STATUS
+
+export const useGetFollowStatus = (
+  followerId?: string,
+  followingId?: string
+) => {
+  return useQuery({
+    queryKey: [
+      "followStatus",
+      followerId,
+      followingId,
+    ],
+
+    queryFn: () =>
+      getFollowStatus(
+        followerId,
+        followingId
+      ),
+
+    enabled:
+      !!followerId &&
+      !!followingId &&
+      followerId !== followingId,
+  });
+};
+
+
+// ============================== FOLLOWERS
+
+export const useGetFollowers = (
+  userId?: string
+) => {
+  return useQuery({
+    queryKey: ["followers", userId],
+
+    queryFn: () =>
+      getFollowers(userId),
+
+    enabled: !!userId,
+  });
+};
+
+
+// ============================== FOLLOWING
+
+export const useGetFollowing = (
+  userId?: string
+) => {
+  return useQuery({
+    queryKey: ["following", userId],
+
+    queryFn: () =>
+      getFollowing(userId),
+
     enabled: !!userId,
   });
 };

@@ -494,3 +494,204 @@ async function populateCreator(post: any) {
     return post
   }
 }
+
+// ============================== GET ALL USERS
+
+export async function getUsers() {
+  try {
+    const users = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      [
+        Query.orderDesc("$createdAt"),
+        Query.limit(50),
+      ]
+    );
+
+    if (!users) throw Error;
+
+    return users;
+  } catch (error) {
+    console.log("GET USERS ERROR:", error);
+    throw error;
+  }
+}
+
+
+// ============================== GET USER BY ID
+
+export async function getUserById(userId?: string) {
+  if (!userId) return null;
+
+  try {
+    const user = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId
+    );
+
+    if (!user) throw Error;
+
+    return user;
+  } catch (error) {
+    console.log("GET USER BY ID ERROR:", error);
+    throw error;
+  }
+}
+
+
+
+// ============================== FOLLOW USER
+
+export async function followUser(
+  followerId: string,
+  followingId: string
+) {
+  if (!followerId || !followingId) {
+    throw new Error("Follower and following IDs are required");
+  }
+
+  if (followerId === followingId) {
+    throw new Error("You cannot follow yourself");
+  }
+
+  try {
+    // Prevent duplicate follow records
+    const existingFollow = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      [
+        Query.equal("followerId", followerId),
+        Query.equal("followingId", followingId),
+        Query.limit(1),
+      ]
+    );
+
+    if (existingFollow.documents.length > 0) {
+      return existingFollow.documents[0];
+    }
+
+    const follow = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      ID.unique(),
+      {
+        followerId,
+        followingId,
+      }
+    );
+
+    return follow;
+  } catch (error) {
+    console.log("FOLLOW USER ERROR:", error);
+    throw error;
+  }
+}
+
+
+// ============================== UNFOLLOW USER
+
+export async function unfollowUser(
+  followerId: string,
+  followingId: string
+) {
+  try {
+    const result = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      [
+        Query.equal("followerId", followerId),
+        Query.equal("followingId", followingId),
+        Query.limit(1),
+      ]
+    );
+
+    const followRecord = result.documents[0];
+
+    if (!followRecord) {
+      return { status: "not-following" };
+    }
+
+    await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      followRecord.$id
+    );
+
+    return { status: "ok" };
+  } catch (error) {
+    console.log("UNFOLLOW USER ERROR:", error);
+    throw error;
+  }
+}
+
+
+// ============================== GET FOLLOW STATUS
+
+export async function getFollowStatus(
+  followerId?: string,
+  followingId?: string
+) {
+  if (!followerId || !followingId) {
+    return null;
+  }
+
+  try {
+    const result = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      [
+        Query.equal("followerId", followerId),
+        Query.equal("followingId", followingId),
+        Query.limit(1),
+      ]
+    );
+
+    return result.documents[0] || null;
+  } catch (error) {
+    console.log("GET FOLLOW STATUS ERROR:", error);
+    throw error;
+  }
+}
+
+
+// ============================== GET FOLLOWERS
+
+export async function getFollowers(userId?: string) {
+  if (!userId) return null;
+
+  try {
+    return await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      [
+        Query.equal("followingId", userId),
+        Query.limit(100),
+      ]
+    );
+  } catch (error) {
+    console.log("GET FOLLOWERS ERROR:", error);
+    throw error;
+  }
+}
+
+
+// ============================== GET FOLLOWING
+
+export async function getFollowing(userId?: string) {
+  if (!userId) return null;
+
+  try {
+    return await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      [
+        Query.equal("followerId", userId),
+        Query.limit(100),
+      ]
+    );
+  } catch (error) {
+    console.log("GET FOLLOWING ERROR:", error);
+    throw error;
+  }
+}

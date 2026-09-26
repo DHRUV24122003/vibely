@@ -6,16 +6,25 @@ import LeftSidebar from "@/components/shared/LeftSidebar";
 
 const RootLayout = () => {
   return (
-    <div className="w-full md:flex">
+    <div className="min-h-screen w-full bg-[#08080A]">
       <Topbar />
+
       <LeftSidebar />
 
-      <section className="flex flex-1 h-full">
+      <main
+        className="
+          min-h-screen
+          min-w-0
+          md:ml-[280px]
+          xl:ml-[300px]
+        "
+      >
         <Outlet />
-      </section>
+      </main>
+
       <Bottombar />
     </div>
   );
 };
 
-export default RootLayout; 
+export default RootLayout;
