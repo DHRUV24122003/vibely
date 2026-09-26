@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { zodResolver } from "@hookform/resolvers/zod"
-
+import { useQueryClient } from "@tanstack/react-query";
 //import { useState } from "react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input" 
@@ -38,39 +38,78 @@ const SignupForm = () => {
   })
 
 
+const queryClient = useQueryClient();
+async function onSubmit(
+  values: z.infer<typeof SignupValidation>
+) {
+  try {
+    // Remove previous user's cached data
+    queryClient.clear();
 
-async function onSubmit(values: z.infer<typeof SignupValidation>) {
-try{
-const newUser = await createUserAccount(values);
-if(!newUser){
-  return toast({title: 'Sign-up failed, please try again'})
-}
+    const newUser =
+      await createUserAccount(values);
 
-const session = await signInAccount({
-  email : values.email,
-  password:values.password,
-})
+    if (!newUser) {
+      toast({
+        title:
+          "Sign-up failed, please try again",
+      });
 
-if (!session) {
-        toast({ title: "Something went wrong. Please login your new account", });
-        navigate("/sign-in");
-        return;
-      }
-
-
-  const isLoggedIn = await checkAuthUser();
-    if (isLoggedIn) {
-        form.reset();
-        navigate("/");
-      } else {
-        toast({ title: "Login failed. Please try again.", });
-        return;
-      }
-    } catch (error) {
-      console.log({ error });
+      return;
     }
+
+    const session =
+      await signInAccount({
+        email: values.email,
+        password: values.password,
+      });
+
+    if (!session) {
+      toast({
+        title:
+          "Account created. Please sign in.",
+      });
+
+      navigate("/sign-in", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    const isLoggedIn =
+      await checkAuthUser();
+
+    if (!isLoggedIn) {
+      toast({
+        title:
+          "Unable to load your new account.",
+      });
+
+      return;
+    }
+
+    // Important:
+    // new account should not inherit old cache
+    queryClient.clear();
+
+    form.reset();
+
+    navigate("/", {
+      replace: true,
+    });
+  } catch (error) {
+    console.error(
+      "SIGN UP ERROR:",
+      error
+    );
+
+    toast({
+      title:
+        "Something went wrong during sign-up.",
+    });
   }
-  
+}
 
 
     return (

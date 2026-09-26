@@ -300,6 +300,58 @@ export async function getRecentPosts() {
 }
 
 
+// ============================== GET PERSONALIZED FEED POSTS
+
+export async function getFeedPosts(userId?: string) {
+  if (!userId) {
+    return null;
+  }
+
+  try {
+    // 1. Find everyone current user follows
+    const followRecords = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.followsCollectionId,
+      [
+        Query.equal("followerId", userId),
+        Query.limit(100),
+      ]
+    );
+
+    // 2. Extract their Users document IDs
+    const followingIds = followRecords.documents.map(
+      (record) => record.followingId as string
+    );
+
+    // 3. Include current user's own posts
+    const feedUserIds = [
+      userId,
+      ...followingIds,
+    ];
+
+    // 4. Get posts created by current user + followed users
+    const posts = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.postCollectionId,
+      [
+        Query.equal("creator", feedUserIds),
+        Query.orderDesc("$createdAt"),
+        Query.limit(50),
+      ]
+    );
+
+    return posts;
+  } catch (error) {
+    console.log(
+      "GET FEED POSTS ERROR:",
+      error
+    );
+
+    throw error;
+  }
+}
+
+
 export async function likePost(postId: string, likesArray: string[]) {
   try {
     const updatedPost = await databases.updateDocument(

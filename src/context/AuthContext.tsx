@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "@/lib/appwrite/api";
 import type { IUser } from "@/types";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-
-
-export const INITIAL_USER = {
+export const INITIAL_USER: IUser = {
   id: "",
   name: "",
   username: "",
@@ -20,47 +23,82 @@ const INITIAL_STATE = {
   isAuthenticated: false,
   setUser: () => {},
   setIsAuthenticated: () => {},
-  checkAuthUser: async () => false as boolean,
+  checkAuthUser: async () => false,
+  resetUser: () => {},
 };
 
 type IContextType = {
   user: IUser;
   isLoading: boolean;
+
   setUser: React.Dispatch<React.SetStateAction<IUser>>;
+
   isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+
+  setIsAuthenticated: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
+
   checkAuthUser: () => Promise<boolean>;
+
+  resetUser: () => void;
 };
 
-  const AuthContext = createContext<IContextType>(INITIAL_STATE);
+const AuthContext =
+  createContext<IContextType>(INITIAL_STATE);
 
- export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const navigate = useNavigate();
-   const [user, setUser] = useState<IUser>(INITIAL_USER);
-   const [isAuthenticated, setIsAuthenticated] = useState(false);
-   const [isLoading, setIsLoading] = useState(false);
+
+  const [user, setUser] =
+    useState<IUser>(INITIAL_USER);
+
+  const [isAuthenticated, setIsAuthenticated] =
+    useState(false);
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const resetUser = () => {
+    setUser(INITIAL_USER);
+    setIsAuthenticated(false);
+  };
 
   const checkAuthUser = async () => {
     setIsLoading(true);
-    try {
-      const currentAccount = await getCurrentUser();
-      if (currentAccount) {
-        setUser({
-          id: currentAccount.$id,
-          name: currentAccount.name,
-          username: currentAccount.username,
-          email: currentAccount.email,
-          imageUrl: currentAccount.imageUrl,
-          bio: currentAccount.bio,
-        });
-        setIsAuthenticated(true);
 
-        return true;
+    try {
+      const currentUser = await getCurrentUser();
+
+      if (!currentUser) {
+        resetUser();
+        return false;
       }
 
-      return false;
+      setUser({
+        id: currentUser.$id,
+        name: currentUser.name ?? "",
+        username: currentUser.username ?? "",
+        email: currentUser.email ?? "",
+        imageUrl: currentUser.imageUrl ?? "",
+        bio: currentUser.bio ?? "",
+      });
+
+      setIsAuthenticated(true);
+
+      return true;
     } catch (error) {
-      console.error(error);
+      console.error(
+        "CHECK AUTH USER ERROR:",
+        error
+      );
+
+      resetUser();
+
       return false;
     } finally {
       setIsLoading(false);
@@ -68,16 +106,16 @@ type IContextType = {
   };
 
   useEffect(() => {
-    const cookieFallback = localStorage.getItem("cookieFallback");
-    if (
-      cookieFallback === "[]" || 
-      cookieFallback === null ||
-      cookieFallback === undefined
-    ) {
-      navigate("/sign-in");
-    }
+    const initializeAuth = async () => {
+      const authenticated =
+        await checkAuthUser();
 
-    checkAuthUser();
+      if (!authenticated) {
+        navigate("/sign-in");
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const value = {
@@ -87,9 +125,15 @@ type IContextType = {
     isAuthenticated,
     setIsAuthenticated,
     checkAuthUser,
+    resetUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useUserContext = () => useContext(AuthContext);
+export const useUserContext = () =>
+  useContext(AuthContext);

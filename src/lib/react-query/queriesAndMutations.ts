@@ -6,7 +6,7 @@ import {
   useInfiniteQuery,
   
 } from "@tanstack/react-query"; 
-import { getUsers,followUser,
+import { getUsers,followUser,getFeedPosts,
 unfollowUser,
 getFollowStatus,
 getFollowers,
@@ -294,6 +294,12 @@ export const useFollowUser = () => {
           variables.followingId,
         ],
       });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "feedPosts",
+          variables.followerId,
+        ],
+      });
 
       queryClient.invalidateQueries({
         queryKey: ["followers", variables.followingId],
@@ -395,6 +401,22 @@ export const useGetFollowing = (
 
     queryFn: () =>
       getFollowing(userId),
+
+    enabled: !!userId,
+  });
+};
+
+
+// ============================== GET FEED POSTS
+
+export const useGetFeedPosts = (
+  userId?: string
+) => {
+  return useQuery({
+    queryKey: ["feedPosts", userId],
+
+    queryFn: () =>
+      getFeedPosts(userId),
 
     enabled: !!userId,
   });

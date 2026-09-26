@@ -2,7 +2,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-
+import { useQueryClient } from "@tanstack/react-query";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,29 +28,61 @@ const SigninForm = () => {
       password: "",
     },
   });
+  const queryClient = useQueryClient();
 
-  const handleSignin = async (user: z.infer<typeof SigninValidation>) => {
-    const session = await signInAccount(user);
+  const handleSignin = async (
+  user: z.infer<typeof SigninValidation>
+) => {
+  try {
+    // Remove previous account's cached data
+    queryClient.clear();
+
+    const session =
+      await signInAccount(user);
 
     if (!session) {
-      toast({ title: "Login failed. Please try again." });
-      
+      toast({
+        title:
+          "Login failed. Please try again.",
+      });
+
       return;
     }
 
-    const isLoggedIn = await checkAuthUser();
+    // Get fresh user from Appwrite
+    const isLoggedIn =
+      await checkAuthUser();
 
-    if (isLoggedIn) {
-      form.reset();
+    if (!isLoggedIn) {
+      toast({
+        title:
+          "Unable to load your account.",
+      });
 
-      navigate("/");
-    } else {
-      toast({ title: "Login failed. Please try again.", });
-      
       return;
     }
-  };
 
+    // Again remove stale queries before
+    // pages mount for the new user
+    queryClient.clear();
+
+    form.reset();
+
+    navigate("/", {
+      replace: true,
+    });
+  } catch (error) {
+    console.error(
+      "SIGN IN ERROR:",
+      error
+    );
+
+    toast({
+      title:
+        "Login failed. Please try again.",
+    });
+  }
+};
   return (
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col">
