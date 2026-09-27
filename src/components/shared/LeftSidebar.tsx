@@ -1,377 +1,501 @@
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import {
-  Link,
-  NavLink,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+  Home,
+  Compass,
+  Users,
+  Bookmark,
+} from "lucide-react";
 
-import { type INavLink } from "@/types";
-import { sidebarLinks } from "@/constants";
-
-import Loader from "@/components/shared/Loader";
-import { Button } from "@/components/ui/button";
-
+import { useUserContext } from "@/context/AuthContext";
 import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
-import {
-  useUserContext,
-  INITIAL_USER,
-} from "@/context/AuthContext";
 
 const LeftSidebar = () => {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const {
     user,
     setUser,
     setIsAuthenticated,
-    isLoading,
   } = useUserContext();
 
-  const { mutate: signOut } = useSignOutAccount();
+  const {
+    mutateAsync: signOutAccount,
+    isPending: isSigningOut,
+  } = useSignOutAccount();
 
-  const handleSignOut = (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.preventDefault();
+  // =========================================================
+  // MENU LINKS
+  // =========================================================
 
-    signOut();
+  const menuLinks = [
+    {
+      label: "Home",
+      route: "/",
+      icon: Home,
+    },
+    {
+      label: "Explore",
+      route: "/explore",
+      icon: Compass,
+    },
+    {
+      label: "People",
+      route: "/all-users",
+      icon: Users,
+    },
+    {
+      label: "Saved",
+      route: "/saved",
+      icon: Bookmark,
+    },
+  ];
 
-    setIsAuthenticated(false);
-    setUser(INITIAL_USER);
+  // =========================================================
+  // LOGOUT
+  // =========================================================
 
-    navigate("/sign-in");
+  const handleLogout = async () => {
+    try {
+      await signOutAccount();
+
+      setUser({
+        id: "",
+        name: "",
+        username: "",
+        email: "",
+        imageUrl: "",
+        bio: "",
+      });
+
+      setIsAuthenticated(false);
+
+      navigate("/sign-in", {
+        replace: true,
+      });
+    } catch (error) {
+      console.error("LOGOUT ERROR:", error);
+    }
   };
-
-  // Create Post gets its own CTA.
-  const navigationLinks = sidebarLinks.filter(
-    (link) => link.route !== "/create-post"
-  );
 
   return (
     <aside
       className="
-        fixed left-0 top-0 z-40 hidden h-screen
+        fixed
+        left-0
+        top-0
+        z-40
+        hidden
+        h-screen
         w-[280px]
-        flex-col justify-between
-        overflow-y-auto
-        border-r border-white/[0.06]
+        flex-col
+        border-r
+        border-white/[0.06]
         bg-[#09090B]
-        px-5 py-7
+        px-5
+        py-7
         md:flex
         xl:w-[300px]
       "
     >
-      {/* ================= TOP ================= */}
-      <div className="flex flex-col">
+      {/* =====================================================
+          VIBELY BRAND
+      ===================================================== */}
 
-        {/* BRAND */}
-        <Link
-          to="/"
-          className="group mb-9 flex items-center gap-3 px-2"
-        >
-          <div
-            className="
-              relative flex h-11 w-11
-              items-center justify-center
-              overflow-hidden rounded-[14px]
-              bg-gradient-to-br
-              from-violet-500 to-indigo-600
-              shadow-[0_8px_30px_rgba(124,58,237,0.22)]
-              transition-transform duration-300
-              group-hover:scale-[1.04]
-            "
-          >
-            <span className="text-xl font-bold text-white">
-              V
-            </span>
+      <Link
+        to="/"
+        className="
+          flex
+          w-fit
+          items-center
+          gap-3
+        "
+      >
+        {/* Vibely Logo */}
 
-            <div
-              className="
-                absolute inset-x-1 top-0
-                h-px
-                bg-gradient-to-r
-                from-transparent via-white/60 to-transparent
-              "
-            />
-          </div>
-
-          <div>
-            <h1 className="text-[22px] font-bold tracking-[-0.03em] text-white">
-              Vibely
-            </h1>
-
-            <p className="mt-0.5 text-[9px] font-medium uppercase tracking-[0.28em] text-light-3">
-              Connect • Share • Discover
-            </p>
-          </div>
-        </Link>
-
-        {/* ================= PROFILE ================= */}
-
-        {isLoading || !user.email ? (
-          <div className="mb-7 flex h-[72px] items-center justify-center">
-            <Loader />
-          </div>
-        ) : (
-          <Link
-            to={`/profile/${user.id}`}
-            className="
-              group mb-7 flex items-center gap-3
-              rounded-2xl
-              border border-white/[0.05]
-              bg-white/[0.025]
-              p-3
-              transition-all duration-300
-              hover:border-white/[0.1]
-              hover:bg-white/[0.045]
-            "
-          >
-            <div className="relative shrink-0">
-              <div
-                className="
-                  rounded-full
-                  bg-gradient-to-br
-                  from-violet-500/80
-                  via-indigo-500/60
-                  to-transparent
-                  p-[1.5px]
-                "
-              >
-                <img
-                  src={
-                    user.imageUrl ||
-                    "/assets/icons/profile-placeholder.svg"
-                  }
-                  alt={user.name}
-                  className="
-                    h-11 w-11 rounded-full
-                    bg-[#09090B]
-                    object-cover
-                  "
-                />
-              </div>
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-white">
-                {user.name}
-              </p>
-
-              <p className="mt-0.5 truncate text-xs text-light-3">
-                @{user.username}
-              </p>
-            </div>
-
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="
-                h-4 w-4 text-light-4
-                transition-all duration-200
-                group-hover:translate-x-0.5
-                group-hover:text-light-2
-              "
-            >
-              <path
-                d="M9 18L15 12L9 6"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
-        )}
-
-        {/* ================= CREATE POST ================= */}
-
-        <Link
-          to="/create-post"
+        <div
           className="
-            group relative mb-7
-            flex h-[52px] items-center
-            justify-center gap-2.5
-            overflow-hidden rounded-2xl
-            bg-gradient-to-r
-            from-violet-600 to-indigo-600
-            font-semibold text-white
-            shadow-[0_10px_35px_rgba(109,40,217,0.18)]
-            transition-all duration-300
-            hover:-translate-y-0.5
-            hover:shadow-[0_14px_40px_rgba(109,40,217,0.28)]
-            active:translate-y-0
+            flex
+            h-12
+            w-12
+            shrink-0
+            items-center
+            justify-center
           "
         >
-          {/* top highlight */}
-          <div
+          <img
+            src="/assets/images/vibely-logo.png"
+            alt="Vibely logo"
             className="
-              pointer-events-none absolute
-              inset-x-8 top-0 h-px
-              bg-gradient-to-r
-              from-transparent via-white/70 to-transparent
+              h-full
+              w-full
+              object-contain
             "
           />
+        </div>
 
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
+        {/* Vibely Name */}
+
+        <div className="flex flex-col">
+          <h1
             className="
-              h-5 w-5
-              transition-transform duration-300
-              group-hover:rotate-90
+              text-[22px]
+              font-semibold
+              leading-none
+              tracking-[-0.035em]
+              text-white
             "
           >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
+            Vibely
+          </h1>
 
-          <span className="text-sm">
-            Create Post
-          </span>
-        </Link>
-
-        {/* ================= NAVIGATION ================= */}
-
-        <div>
           <p
             className="
-              mb-3 px-3
-              text-[10px] font-semibold
-              uppercase tracking-[0.2em]
-              text-light-4
+              mt-2
+              text-[8px]
+              font-semibold
+              uppercase
+              tracking-[0.28em]
+              text-white/40
             "
           >
-            Menu
+            Connect • Share • Discover
+          </p>
+        </div>
+      </Link>
+
+      {/* =====================================================
+          PROFILE CARD
+      ===================================================== */}
+
+      <Link
+        to={`/profile/${user.id}`}
+        className="
+          group
+          mt-10
+          flex
+          items-center
+          gap-3
+          rounded-2xl
+          border
+          border-white/[0.07]
+          bg-white/[0.025]
+          p-3
+          transition-all
+          duration-200
+          hover:border-white/[0.11]
+          hover:bg-white/[0.045]
+        "
+      >
+        {/* Profile Picture */}
+
+        <div
+          className="
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-full
+            border
+            border-violet-500/50
+            bg-white/[0.05]
+          "
+        >
+          {user.imageUrl ? (
+            <img
+              src={user.imageUrl}
+              alt={user.name || "profile"}
+              className="
+                h-full
+                w-full
+                object-cover
+              "
+            />
+          ) : (
+            <span
+              className="
+                text-base
+                font-medium
+                text-white
+              "
+            >
+              {user.name?.charAt(0).toUpperCase() || "U"}
+            </span>
+          )}
+        </div>
+
+        {/* User Details */}
+
+        <div className="min-w-0 flex-1">
+          <p
+            className="
+              truncate
+              text-sm
+              font-semibold
+              text-white
+            "
+          >
+            {user.name || "Vibely user"}
           </p>
 
-          <nav>
-            <ul className="flex flex-col gap-1.5">
-              {navigationLinks.map((link: INavLink) => {
-                const isActive =
-                  pathname === link.route ||
-                  (link.route !== "/" &&
-                    pathname.startsWith(link.route));
-
-                return (
-                  <li key={link.label}>
-                    <NavLink
-                      to={link.route}
-                      className={`
-                        group relative
-                        flex items-center gap-3.5
-                        rounded-xl
-                        px-3.5 py-3
-                        transition-all duration-200
-                        ${
-                          isActive
-                            ? "bg-white/[0.07] text-white"
-                            : "text-light-3 hover:bg-white/[0.035] hover:text-white"
-                        }
-                      `}
-                    >
-                      {/* Active indicator */}
-                      {isActive && (
-                        <span
-                          className="
-                            absolute -left-5
-                            h-7 w-[3px]
-                            rounded-r-full
-                            bg-violet-500
-                            shadow-[0_0_15px_rgba(139,92,246,0.65)]
-                          "
-                        />
-                      )}
-
-                      <div
-                        className={`
-                          flex h-8 w-8
-                          items-center justify-center
-                          rounded-lg
-                          transition-all duration-200
-                          ${
-                            isActive
-                              ? "bg-violet-500/10"
-                              : "group-hover:bg-white/[0.04]"
-                          }
-                        `}
-                      >
-                        <img
-                          src={link.imgURL}
-                          alt=""
-                          className={`
-                            h-[21px] w-[21px]
-                            transition-all duration-200
-                            ${
-                              isActive
-                                ? "invert-white"
-                                : "group-hover:invert-white"
-                            }
-                          `}
-                        />
-                      </div>
-
-                      <span className="text-sm font-medium">
-                        {link.label}
-                      </span>
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+          <p
+            className="
+              mt-0.5
+              truncate
+              text-xs
+              text-white/40
+            "
+          >
+            @{user.username || "username"}
+          </p>
         </div>
+
+        {/* Existing arrow style */}
+
+        <span
+          className="
+            text-lg
+            text-white/35
+            transition-colors
+            group-hover:text-white/70
+          "
+        >
+          ›
+        </span>
+      </Link>
+
+      {/* =====================================================
+          CREATE POST BUTTON
+      ===================================================== */}
+
+      <Link
+        to="/create-post"
+        className="
+          mt-7
+          flex
+          h-[52px]
+          w-full
+          items-center
+          justify-center
+          gap-3
+          rounded-[14px]
+          bg-gradient-to-r
+          from-violet-600
+          to-indigo-600
+          text-sm
+          font-semibold
+          text-white
+          shadow-[0_12px_35px_rgba(124,58,237,0.15)]
+          transition-all
+          duration-200
+          hover:-translate-y-[1px]
+          hover:shadow-[0_15px_40px_rgba(124,58,237,0.22)]
+        "
+      >
+        <span className="text-[24px] font-light leading-none">
+          +
+        </span>
+
+        <span>Create Post</span>
+      </Link>
+
+      {/* =====================================================
+          MENU TITLE
+      ===================================================== */}
+
+      <div className="mt-8 px-3">
+        <p
+          className="
+            text-[9px]
+            font-semibold
+            uppercase
+            tracking-[0.22em]
+            text-white/25
+          "
+        >
+          Menu
+        </p>
       </div>
 
-      {/* ================= BOTTOM ================= */}
+      {/* =====================================================
+          MENU
+      ===================================================== */}
 
-      <div className="border-t border-white/[0.06] pt-5">
+      <nav
+        className="
+          mt-3
+          flex
+          flex-col
+          gap-1.5
+        "
+      >
+        {menuLinks.map((link) => {
+          const Icon = link.icon;
 
-        {/* Mini account label */}
-        {!isLoading && user.email && (
-          <div className="mb-3 px-3">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-light-4">
-              Signed in as
-            </p>
+          const isActive =
+            link.route === "/"
+              ? pathname === "/"
+              : pathname.startsWith(link.route);
 
-            <p className="mt-1 truncate text-xs text-light-3">
-              {user.email}
-            </p>
-          </div>
-        )}
+          return (
+            <Link
+              key={link.label}
+              to={link.route}
+              className={`
+                group
+                relative
+                flex
+                h-[54px]
+                items-center
+                gap-4
+                rounded-[14px]
+                px-4
+                transition-all
+                duration-200
 
-        {/* Logout */}
-        <Button
-          variant="ghost"
-          onClick={handleSignOut}
+                ${
+                  isActive
+                    ? "bg-white/[0.065] text-white"
+                    : "text-white/60 hover:bg-white/[0.035] hover:text-white"
+                }
+              `}
+            >
+              {/* Active purple line */}
+
+              {isActive && (
+                <span
+                  className="
+                    absolute
+                    -left-5
+                    h-7
+                    w-[3px]
+                    rounded-r-full
+                    bg-violet-500
+                    shadow-[0_0_12px_rgba(139,92,246,0.5)]
+                  "
+                />
+              )}
+
+              {/* =================================================
+                  MENU ICON
+
+                  DEFAULT = WHITE
+                  HOVER   = LIGHT PURPLE
+              ================================================= */}
+
+              <Icon
+                strokeWidth={1.8}
+                className={`
+                  h-[21px]
+                  w-[21px]
+                  shrink-0
+                  transition-colors
+                  duration-200
+
+                  ${
+                    isActive
+                      ? "text-white"
+                      : "text-white group-hover:text-violet-300"
+                  }
+                `}
+              />
+
+              <span
+                className={`
+                  text-[14px]
+                  font-medium
+                  transition-colors
+                  duration-200
+
+                  ${
+                    isActive
+                      ? "text-white"
+                      : "text-white/60 group-hover:text-white"
+                  }
+                `}
+              >
+                {link.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* =====================================================
+          BOTTOM ACCOUNT AREA
+      ===================================================== */}
+
+      <div
+        className="
+          mt-auto
+          border-t
+          border-white/[0.06]
+          pt-5
+        "
+      >
+        <div className="px-3">
+          <p
+            className="
+              text-[9px]
+              font-semibold
+              uppercase
+              tracking-[0.22em]
+              text-white/25
+            "
+          >
+            Signed in as
+          </p>
+
+          <p
+            className="
+              mt-2
+              truncate
+              text-xs
+              text-white/45
+            "
+          >
+            {user.email}
+          </p>
+        </div>
+
+        {/* Logout — unchanged styling */}
+
+        <button
+          type="button"
+          disabled={isSigningOut}
+          onClick={handleLogout}
           className="
-            group flex h-11 w-full
-            justify-start gap-3
-            rounded-xl px-3
-            text-light-3
-            transition-all duration-200
-            hover:bg-red-500/[0.07]
-            hover:text-red-300
+            mt-4
+            flex
+            h-11
+            w-full
+            items-center
+            gap-3
+            rounded-xl
+            px-3
+            text-white/55
+            transition-all
+            duration-200
+            hover:bg-white/[0.035]
+            hover:text-white
+            disabled:cursor-not-allowed
+            disabled:opacity-50
           "
         >
           <img
             src="/assets/icons/logout.svg"
-            alt=""
-            className="
-              h-5 w-5
-              transition-transform duration-200
-              group-hover:translate-x-0.5
-            "
+            alt="logout"
+            className="h-[19px] w-[19px]"
           />
 
           <span className="text-sm font-medium">
-            Logout
+            {isSigningOut ? "Logging out..." : "Logout"}
           </span>
-        </Button>
+        </button>
       </div>
     </aside>
   );

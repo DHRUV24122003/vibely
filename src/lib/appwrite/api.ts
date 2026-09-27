@@ -302,6 +302,8 @@ export async function getRecentPosts() {
 
 // ============================== GET PERSONALIZED FEED POSTS
 
+// ============================== GET PERSONALIZED FEED POSTS
+
 export async function getFeedPosts(userId?: string) {
   if (!userId) {
     return null;
@@ -318,18 +320,19 @@ export async function getFeedPosts(userId?: string) {
       ]
     );
 
-    // 2. Extract their Users document IDs
+    // 2. Extract followed users' document IDs
     const followingIds = followRecords.documents.map(
       (record) => record.followingId as string
     );
 
-    // 3. Include current user's own posts
+    // 3. Feed contains:
+    // current user's posts + followed users' posts
     const feedUserIds = [
       userId,
       ...followingIds,
     ];
 
-    // 4. Get posts created by current user + followed users
+    // 4. Fetch posts
     const posts = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
@@ -340,7 +343,19 @@ export async function getFeedPosts(userId?: string) {
       ]
     );
 
-    return posts;
+    // 5. IMPORTANT:
+    // Convert creator ID into complete creator object
+    const documents = await Promise.all(
+      posts.documents.map((post) =>
+        populateCreator(post)
+      )
+    );
+
+    // 6. Return posts with populated creator
+    return {
+      ...posts,
+      documents,
+    };
   } catch (error) {
     console.log(
       "GET FEED POSTS ERROR:",
