@@ -351,7 +351,7 @@ export async function getFeedPosts(userId?: string) {
       )
     );
 
-    // 6. Return posts with populated creator
+    //6.  Return posts with populated creator
     return {
       ...posts,
       documents,
